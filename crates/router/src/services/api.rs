@@ -177,7 +177,8 @@ where
                                     router_data
                                 }
                             };
-                            logger::debug!(?response);
+println!("holaaaa {:?}",response);
+                            //logger::debug!(?response);
                             Ok(response)
                         }
                         Err(error) => Err(error

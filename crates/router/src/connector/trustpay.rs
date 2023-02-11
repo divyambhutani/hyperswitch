@@ -287,7 +287,7 @@ impl
 
     fn get_request_body(&self, req: &types::PaymentsAuthorizeRouterData) -> CustomResult<Option<String>,errors::ConnectorError> {
         let trustpay_req =
-            utils::Encode::<trustpay::TrustpayPaymentsRequest>::convert_and_encode(req).change_context(errors::ConnectorError::RequestEncodingFailed)?;
+            utils::Encode::<trustpay::TrustpayPaymentsRequest>::convert_and_url_encode(req).change_context(errors::ConnectorError::RequestEncodingFailed)?;
         logger::info!("trustpay_req{:?}",trustpay_req);
         println!("bodyyyyyyyy{:?}", trustpay_req);
         Ok(Some(trustpay_req))
@@ -331,6 +331,25 @@ impl
     fn get_error_response(&self, res: Response) -> CustomResult<ErrorResponse,errors::ConnectorError> {
         self.build_error_response(res)
     }
+    // fn get_error_response(
+    //     &self,
+    //     res: types::Response,
+    // ) -> CustomResult<types::ErrorResponse, errors::ConnectorError> {
+    //     let response: trustpay::TrustpayErrorResponse = res
+    //         .response
+    //         .parse_struct("TrustpayErrorResponse")
+    //         .change_context(errors::ConnectorError::ResponseDeserializationFailed)?;
+
+    //     Ok(types::ErrorResponse {
+    //         status_code: res.status,
+    //         code: res.status,
+    //         message: response
+    //             .error
+    //             .message
+    //             .unwrap_or_else(|| consts::NO_ERROR_MESSAGE.to_string()),
+    //         reason: None,
+    //     })
+    // }
 }
 
 impl api::Refund for Trustpay {}

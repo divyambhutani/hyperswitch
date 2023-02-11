@@ -1,8 +1,9 @@
+
 use error_stack::{IntoReport, ResultExt};
 use masking::PeekInterface;
 use serde::{Deserialize, Serialize};
 use crate::{core::errors,types::{self,api, storage::enums}};
-
+use serde_repr::{Serialize_repr, Deserialize_repr};
 //TODO: Fill the struct with respective fields
 // specifying only required fields
 #[derive(Default, Debug, Serialize, Eq, PartialEq)]
@@ -76,22 +77,16 @@ impl TryFrom<&types::ConnectorAuthType> for TrustpayAuthType  {
 //     Processing,
 // }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Debug, Serialize_repr, Deserialize_repr , PartialEq, Eq, Clone)]
+#[repr(i32)]
 pub enum TrustpayPaymentStatus {
-    #[serde(rename = "0")]
-    Success,
-    #[serde(rename = "1")]
-    Pending,
-    #[serde(rename = "-1")]
-    Expired,
-    #[serde(rename = "-2")]
-    Error,
-    #[serde(rename = "-3")]
-    ServerCallFailed,
-    #[serde(rename = "-4")]
-    AbortedByUser,
-    #[serde(rename = "-255")]
-    Failure,
+    Success=0,
+    Pending=1,
+    Expired= (-1),
+    Error=-2,
+    ServerCallFailed=-3,
+    AbortedByUser=-4,
+    Failure=-255,
 }
 
 impl Default for TrustpayPaymentStatus {
@@ -152,6 +147,7 @@ impl<F,T> TryFrom<types::ResponseRouterData<F, TrustpayPaymentsResponse, T, type
             status: enums::AttemptStatus::from(item.response.status),
             response: Ok(types::PaymentsResponseData::TransactionResponse {
                 resource_id: types::ResponseId::ConnectorTransactionId(item.response.instanceId),
+                //resource_id: item.response.instanceId,
                 redirection_data: None,
                 redirect: false,
                 mandate_reference: None,
