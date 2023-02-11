@@ -123,7 +123,7 @@ impl
         Ok(format!(
             "{}{}/{}",
             self.base_url(connectors),
-            "v1/payment_intents",
+            "instance",
             id.get_connector_transaction_id()
                 .change_context(errors::ConnectorError::MissingConnectorTransactionID)?
         ))
@@ -155,20 +155,32 @@ impl
         data: &types::PaymentsSyncRouterData,
         res: Response,
     ) -> CustomResult<types::PaymentsSyncRouterData, errors::ConnectorError> {
-        logger::debug!(payment_sync_response=?res);
-        let response: trustpay:: TrustpayPaymentsResponse = res
+        // logger::debug!(payment_sync_response=?res);
+        // let response: trustpay:: TrustpayPaymentsResponse = res
+        //     .response
+        //     .parse_struct("trustpay PaymentsResponse")
+        //     .change_context(errors::ConnectorError::ResponseDeserializationFailed)?;
+        // types::RouterData::try_from(types::ResponseRouterData {
+        //     response,
+        //     data: data.clone(),
+        //     http_code: res.status_code,
+        // })
+        // .change_context(errors::ConnectorError::ResponseHandlingFailed)
+        logger::debug!(target: "router::connector::trustpay", response=?res);
+        let response: trustpay::TrustPaySyncResponse = res
             .response
-            .parse_struct("trustpay PaymentsResponse")
+            .parse_struct("trustpay OrderResponse")
             .change_context(errors::ConnectorError::ResponseDeserializationFailed)?;
-        types::RouterData::try_from(types::ResponseRouterData {
+        types::ResponseRouterData {
             response,
             data: data.clone(),
             http_code: res.status_code,
-        })
+        }
+        .try_into()
         .change_context(errors::ConnectorError::ResponseHandlingFailed)
     }
 }
-
+  
 
 impl api::PaymentCapture for Trustpay {}
 impl
@@ -339,10 +351,14 @@ impl
     //         .response
     //         .parse_struct("TrustpayErrorResponse")
     //         .change_context(errors::ConnectorError::ResponseDeserializationFailed)?;
-
+    //     println!("TrustpayErrorResponse{:?}",response);
+    //     let first_err = match response.errors.first(){
+    //                 Some(first) => first,
+    //                 _ => Err(errors::ConnectorError::ResponseHandlingFailed)?,
+    //             };
     //     Ok(types::ErrorResponse {
-    //         status_code: res.status,
-    //         code: res.status,
+    //         status_code: response.status,
+    //         code: response.status,
     //         message: response
     //             .error
     //             .message
